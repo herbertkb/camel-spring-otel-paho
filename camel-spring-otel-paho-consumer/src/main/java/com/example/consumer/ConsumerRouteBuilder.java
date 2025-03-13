@@ -42,45 +42,16 @@ public class ConsumerRouteBuilder extends RouteBuilder {
 
         from("paho-mqtt5:{{app.topic}}")
             .id("route-paho-consumer")
-            .process(exchange -> {
-                String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
-                    .getUserProperties().stream()
-                    .filter(up -> up.getKey().equals("traceparent"))
-                    .findFirst().get().getValue();                
-                String traceId = traceParent.substring(3,35);
-                String spanId = traceParent.substring(36,52);
-
-                LOGGER.info("TRACEPARENT: "+traceParent);
-                LOGGER.info("traceId: "+traceId);
-                LOGGER.info("spanId: "+spanId);
-
-                SpanContext remoteContext = SpanContext.createFromRemoteParent(
-                    traceId,
-                    spanId,
-                    TraceFlags.getSampled(),
-                    TraceState.getDefault());
-
-                SpanBuilder sb = otelTracer.getTracer().spanBuilder("paho-consumer");
-                sb.setParent(Context.current().with(Span.wrap(remoteContext)));
-                Span span = sb.startSpan();
-
-                exchange.setProperty("span", span);
-            })
+            .process(new StartSpanProcessor(otelTracer))
             .to("direct:sub");
 
         from("direct:sub")
             .id("route-paho-consumer-process")
             .delay(simple("{{app.delay}}"))
             .log(INFO, "HEADERS: ${in.headers}")
-            .process(exchange -> {
-                String body = exchange.getIn().getBody(String.class);
-                int bodyLength = body.length()  < maxBodyLength ? body.length() : maxBodyLength;
-                exchange.getIn().setBody(body.substring(0, bodyLength));                    
-            })
+            .process(new BodyLengthProcessor(maxBodyLength))
             .log(INFO, "BODY: ${body}")
-            .process(exchange -> {
-                exchange.getProperty("span", Span.class).end();
-            })
+            .process(new EndSpanProcessor())
             ;
     }
 }
