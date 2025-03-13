@@ -1,4 +1,4 @@
-package com.example.amqp.producer;
+package com.example.paho.producer;
 
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.component.paho.mqtt5.PahoMqtt5Constants.CAMEL_PAHO_MSG_PROPERTIES;
