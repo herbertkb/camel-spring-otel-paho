@@ -1,0 +1,22 @@
+= Camel Spring Boot OpenTelemetry Paho-MQTTv5 Consumer 
+
+. Build the project
++
+....
+ mvn clean package
+....
+
+. Start the fat jar
++
+....
+ mvn spring-boot:run
+....
+
+or 
+```
+java -javaagent:../camel-spring-otel-paho-producer/target/javaagents/javaagent.jar  \
+     -Dotel.service.name=your-service-name \
+     -Dotel.traces.exporter=otlp \
+     -jar target/camel-spring-otel-paho-consumer.jar
+
+```
