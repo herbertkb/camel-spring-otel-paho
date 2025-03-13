@@ -21,9 +21,12 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.camel.component.paho.mqtt5.PahoMqtt5Constants.CAMEL_PAHO_MSG_PROPERTIES;
 
+import java.io.IOException;
+
 import org.apache.camel.CamelContext;
 
 import io.opentelemetry.context.propagation.TextMapGetter;
+import jakarta.annotation.PreDestroy;
 
 
 
@@ -33,18 +36,49 @@ public class ConsumerRouteBuilder extends RouteBuilder {
     @Autowired
     CamelContext camelContext;
 
+    // @Autowired
+    // OpenTelemetryTracer otelTracer;
+
+    // @PreDestroy
+    // public void destroy() throws IOException {
+    //     otelTracer.close();
+    // }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerRouteBuilder.class);
 
     @Override
     public void configure() throws Exception {
 
         OpenTelemetryTracer otelTracer = new OpenTelemetryTracer();
-        // And then initialize the context
         otelTracer.init(camelContext);
 
 
         from("paho-mqtt5:{{app.topic}}")
             .id("route-paho-consumer")
+            .process(exchange -> {
+                String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
+                    .getUserProperties().stream()
+                    .filter(up -> up.getKey().equals("traceparent"))
+                    .findFirst().get().getValue();                
+                String traceId = traceParent.substring(3,35);
+                String spanId = traceParent.substring(36,52);
+
+                LOGGER.info("TRACEPARENT: "+traceParent);
+                LOGGER.info("traceId: "+traceId);
+                LOGGER.info("spanId: "+spanId);
+
+                SpanContext remoteContext = SpanContext.createFromRemoteParent(
+                    traceId,
+                    spanId,
+                    TraceFlags.getSampled(),
+                    TraceState.getDefault());
+
+                SpanBuilder sb = otelTracer.getTracer().spanBuilder("paho-consumer");
+                sb.setParent(Context.current().with(Span.wrap(remoteContext)));
+                Span span = sb.startSpan();
+
+                exchange.getIn().setHeader("span", span);
+            })
 
             // .process(exchange -> {
             //     String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
@@ -62,34 +96,38 @@ public class ConsumerRouteBuilder extends RouteBuilder {
             .delay(simple("{{app.delay}}"))
             .log("HEADERS: ${in.headers}")
 
-            .process(exchange -> {
-                // Tracer tracer = exchange.getContext().getRegistry()
-                //     .lookupByNameAndType("tracer", OpenTelemetryTracer.class ).getTracer();
-                // tracer.spanBuilder("paho-consumer").setParent(Context.current().with());
-                Tracer tracer = otelTracer.getTracer();
+            // .process(exchange -> {
+            //     // Tracer tracer = exchange.getContext().getRegistry()
+            //     //     .lookupByNameAndType("tracer", OpenTelemetryTracer.class ).getTracer();
+            //     // tracer.spanBuilder("paho-consumer").setParent(Context.current().with());
+            //     Tracer tracer = otelTracer.getTracer();
 
-                // Span.current().setAttribute("traceparent", null);
-                String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
-                    .getUserProperties().stream()
-                    .filter(up -> up.getKey().equals("traceparent"))
-                    .findFirst().get().getValue();
+            //     // Span.current().setAttribute("traceparent", null);
+            //     String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
+            //         .getUserProperties().stream()
+            //         .filter(up -> up.getKey().equals("traceparent"))
+            //         .findFirst().get().getValue();
 
-                //TODO: DELETE THIS
-                LOGGER.info("TRACEPARENT: "+traceParent);
+            //     //TODO: DELETE THIS
+            //     LOGGER.info("TRACEPARENT: "+traceParent);
 
                 
-                SpanContext fromProducerContext = SpanContext.createFromRemoteParent(
-                    traceParent, "", TraceFlags.getSampled(), TraceState.getDefault());
+            //     SpanContext fromProducerContext = SpanContext.createFromRemoteParent(
+            //         traceParent, "", TraceFlags.getSampled(), TraceState.getDefault());
 
-                LOGGER.info("fromProducerContext: "+fromProducerContext);
+            //     LOGGER.info("fromProducerContext: "+fromProducerContext);
 
 
-                SpanBuilder sb = tracer.spanBuilder("paho-consumer");
-                sb.setParent(Context.current().with(Span.wrap(fromProducerContext)));
-                sb.startSpan();
+            //     SpanBuilder sb = tracer.spanBuilder("paho-consumer");
+            //     sb.setParent(Context.current().with(Span.wrap(fromProducerContext)));
+            //     sb.startSpan();
+            // })
+
+            .log(INFO, "BODY: ${body}")
+            .process(exchange -> {
+                exchange.getIn().getHeader("span", Span.class).end();
             })
-
-            .log(INFO, "BODY: ${body}");
+            ;
     }
 
     
