@@ -64,7 +64,7 @@ public class ConsumerRouteBuilder extends RouteBuilder {
                 sb.setParent(Context.current().with(Span.wrap(remoteContext)));
                 Span span = sb.startSpan();
 
-                exchange.getIn().setHeader("span", span);
+                exchange.setProperty("span", span);
             })
             .to("direct:sub");
 
@@ -79,10 +79,8 @@ public class ConsumerRouteBuilder extends RouteBuilder {
             })
             .log(INFO, "BODY: ${body}")
             .process(exchange -> {
-                exchange.getIn().getHeader("span", Span.class).end();
+                exchange.getProperty("span", Span.class).end();
             })
             ;
     }
-
-    
 }
