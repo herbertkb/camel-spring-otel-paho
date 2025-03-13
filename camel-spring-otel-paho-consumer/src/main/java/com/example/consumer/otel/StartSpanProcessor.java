@@ -1,4 +1,4 @@
-package com.example.consumer;
+package com.example.consumer.otel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
