@@ -3,12 +3,7 @@ package com.example.amqp.producer;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.component.paho.mqtt5.PahoMqtt5Constants.CAMEL_PAHO_MSG_PROPERTIES;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.apache.camel.Header;
-import org.apache.camel.Headers;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
@@ -20,13 +15,6 @@ public class ProducerRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-
-        // restConfiguration()
-        //     .component("servlet");
-
-        // rest()
-        //     .get("/test")
-        //     .to("direct:sendMqtt");
 
         from("timer:runOnce?repeatCount=1")
             .id("route-runOnce")

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
@@ -15,18 +15,18 @@
         <opentelemetry-agent.version>1.25.1</opentelemetry-agent.version>
         <!-- <maven.compiler.release>17</maven.compiler.release> -->
         <maven.compiler.source>17</maven.compiler.source>
-       <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                 <groupId>com.redhat.camel.springboot.platform</groupId>
+                <groupId>com.redhat.camel.springboot.platform</groupId>
                 <artifactId>camel-spring-boot-bom</artifactId>
                 <version>${camel-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                </dependency>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -85,44 +85,44 @@
                 </executions>
             </plugin>
 
-              <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-javaagent</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>io.opentelemetry.javaagent</groupId>
-                                            <artifactId>opentelemetry-javaagent</artifactId>
-                                            <version>${opentelemetry-agent.version}</version>
-                                            <overWrite>true</overWrite>
-                                            <outputDirectory>${project.build.directory}/javaagents</outputDirectory>
-                                            <destFileName>javaagent.jar</destFileName>
-                                        </artifactItem>
-                                    </artifactItems>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-javaagent</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
                         <configuration>
-                            <agents>
-                                <agent>${project.build.directory}/javaagents/javaagent.jar</agent>
-                            </agents>
-                            <!--                    <systemPropertyVariables>-->
-                            <!--                        <otel.traces.sampler>parentbased_traceidratio</otel.traces.sampler>-->
-                            <!--                        <otel.traces.sampler.arg>0.2</otel.traces.sampler.arg>-->
-                            <!--                    </systemPropertyVariables>-->
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.opentelemetry.javaagent</groupId>
+                                    <artifactId>opentelemetry-javaagent</artifactId>
+                                    <version>${opentelemetry-agent.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/javaagents</outputDirectory>
+                                    <destFileName>javaagent.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
-                    </plugin>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <agents>
+                        <agent>${project.build.directory}/javaagents/javaagent.jar</agent>
+                    </agents>
+                    <!--                    <systemPropertyVariables>-->
+                    <!--                        <otel.traces.sampler>parentbased_traceidratio</otel.traces.sampler>-->
+                    <!--                        <otel.traces.sampler.arg>0.2</otel.traces.sampler.arg>-->
+                    <!--                    </systemPropertyVariables>-->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
