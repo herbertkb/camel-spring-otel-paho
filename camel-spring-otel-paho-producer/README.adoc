@@ -1,4 +1,4 @@
-= Spring Boot Camel AMQP Producer
+= Camel Spring Boot OpenTelemetry Paho-MQTTv5 Producer 
 
 . Build the project
 +
@@ -10,16 +10,4 @@
 +
 ....
  mvn spring-boot:run
-....
-
-- To run with a unique client ID
-+
-....
-CLIENT_ID=producer_01 mvn spring-boot:run
-....
-
-- To change the destination address
-+
-....
-DESTINATION=queue:someQ mvn spring-boot:run
 ....

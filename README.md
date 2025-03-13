@@ -22,9 +22,7 @@ Web console: http://localhost:16686
 
 ## Artemis
 
-Create a default activemq-artemis instance and run it with user=`admin` and password=`password`.
-
-Or run the community container image. The username and password are both `artemis`.
+Run the community container image. The username and password are both `artemis`.
 
 ```
 docker run --detach --name artemis -p 1883:1883 -p 8161:8161 --rm apache/activemq-artemis:latest-alpine

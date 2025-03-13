@@ -3,6 +3,7 @@ package com.example.consumer;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.opentelemetry.OpenTelemetryTracer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.opentelemetry.api.trace.Span;
@@ -24,11 +25,14 @@ import org.apache.camel.CamelContext;
 
 @Component
 public class ConsumerRouteBuilder extends RouteBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerRouteBuilder.class);
 
     @Autowired
     CamelContext camelContext;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerRouteBuilder.class);
+    @Value("${app.max-body-length}")
+    private Integer maxBodyLength;
+
 
     @Override
     public void configure() throws Exception {
@@ -68,6 +72,11 @@ public class ConsumerRouteBuilder extends RouteBuilder {
             .id("route-paho-consumer-process")
             .delay(simple("{{app.delay}}"))
             .log(INFO, "HEADERS: ${in.headers}")
+            .process(exchange -> {
+                String body = exchange.getIn().getBody(String.class);
+                int bodyLength = body.length()  < maxBodyLength ? body.length() : maxBodyLength;
+                exchange.getIn().setBody(body.substring(0, bodyLength));                    
+            })
             .log(INFO, "BODY: ${body}")
             .process(exchange -> {
                 exchange.getIn().getHeader("span", Span.class).end();
