@@ -26,28 +26,28 @@ public class StartSpanProcessor implements Processor {
     }
 
     public void process(Exchange exchange) throws Exception {
-         String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
-                    .getUserProperties().stream()
-                    .filter(up -> up.getKey().equals("traceparent"))
-                    .findFirst().get().getValue();                
-                String traceId = traceParent.substring(3,35);
-                String spanId = traceParent.substring(36,52);
+        String traceParent = exchange.getMessage().getHeader(CAMEL_PAHO_MSG_PROPERTIES, MqttProperties.class)
+                .getUserProperties().stream()
+                .filter(up -> up.getKey().equals("traceparent"))
+                .findFirst().get().getValue();
+        String traceId = traceParent.substring(3, 35);
+        String spanId = traceParent.substring(36, 52);
 
-                LOGGER.debug("TRACEPARENT: "+traceParent);
-                LOGGER.debug("traceId: "+traceId);
-                LOGGER.debug("spanId: "+spanId);
+        LOGGER.debug("TRACEPARENT: " + traceParent);
+        LOGGER.debug("traceId: " + traceId);
+        LOGGER.debug("spanId: " + spanId);
 
-                SpanContext remoteContext = SpanContext.createFromRemoteParent(
-                    traceId,
-                    spanId,
-                    TraceFlags.getSampled(),
-                    TraceState.getDefault());
+        SpanContext remoteContext = SpanContext.createFromRemoteParent(
+                traceId,
+                spanId,
+                TraceFlags.getSampled(),
+                TraceState.getDefault());
 
-                SpanBuilder sb = otelTracer.getTracer().spanBuilder("paho-consumer");
-                sb.setParent(Context.current().with(Span.wrap(remoteContext)));
-                Span span = sb.startSpan();
+        SpanBuilder sb = otelTracer.getTracer().spanBuilder("paho-consumer");
+        sb.setParent(Context.current().with(Span.wrap(remoteContext)));
+        Span span = sb.startSpan();
 
-                exchange.setProperty("span", span);
+        exchange.setProperty("span", span);
     }
 
 }
