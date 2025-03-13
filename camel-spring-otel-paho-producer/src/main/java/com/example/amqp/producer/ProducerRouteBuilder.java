@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.camel.Header;
 import org.apache.camel.Headers;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
@@ -34,21 +35,18 @@ public class ProducerRouteBuilder extends RouteBuilder {
         from("direct:sendMqtt")
             .id("route-paho-producer")
             .setBody(constant("HELLO from Camel!"))
-            .setHeader(CAMEL_PAHO_MSG_PROPERTIES, method(this, "mqttPropertiesFromHeaders"))
+            .setHeader(CAMEL_PAHO_MSG_PROPERTIES, method(this, "setTraceParent"))
             .log(INFO, "New message with trace=${header.traceparent}")
             .log("HEADERS ${in.headers}")
             .log("Exchange information: ${exchange}")
             .to("paho-mqtt5:{{app.topic}}");
     }
 
-    public MqttProperties mqttPropertiesFromHeaders(@Headers Map<String, Object> headers) {
-        List<UserProperty> userProperties = headers.entrySet().stream()
-                .map(entry -> new UserProperty(entry.getKey(), String.valueOf(entry.getValue())))
-                .collect(Collectors.toList());
-        
-        MqttProperties properties = new MqttProperties();
-        properties.setUserProperties(userProperties);
-
-        return properties;
+    public MqttProperties setTraceParent(
+            @Header("traceparent") String traceParent,
+            @Header(CAMEL_PAHO_MSG_PROPERTIES) MqttProperties mqttProperties) {
+        mqttProperties = mqttProperties == null ? new MqttProperties() : mqttProperties;
+        mqttProperties.getUserProperties().add(new UserProperty("traceparent", traceParent));
+        return mqttProperties;
     }
 }
