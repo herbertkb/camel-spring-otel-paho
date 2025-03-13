@@ -9,20 +9,10 @@ import org.springframework.stereotype.Component;
 import com.example.consumer.otel.EndSpanProcessor;
 import com.example.consumer.otel.StartSpanProcessor;
 
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanBuilder;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceState;
-import io.opentelemetry.context.Context;
-
 import static org.apache.camel.LoggingLevel.INFO;
 
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.camel.component.paho.mqtt5.PahoMqtt5Constants.CAMEL_PAHO_MSG_PROPERTIES;
 
 import org.apache.camel.CamelContext;
 
