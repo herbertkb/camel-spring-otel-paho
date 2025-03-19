@@ -11,7 +11,10 @@ public class EndSpanProcessor implements Processor {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndSpanProcessor.class);
 
     public void process(Exchange exchange) throws Exception {
-        exchange.getProperty("span", Span.class).end();
+        Span span = exchange.getProperty("span", Span.class);
+        if (span != null) {
+            span.end();
+        }
     }
 
 }
