@@ -12,9 +12,8 @@ public class EndSpanProcessor implements Processor {
 
     public void process(Exchange exchange) throws Exception {
         Span span = exchange.getProperty("span", Span.class);
-        if (span != null) {
-            span.end();
-        }
+        if (span == null) return;
+        span.end();
     }
 
 }

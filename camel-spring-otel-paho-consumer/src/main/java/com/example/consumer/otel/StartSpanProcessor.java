@@ -55,5 +55,4 @@ public class StartSpanProcessor implements Processor {
 
         exchange.setProperty("span", span);
     }
-
 }
