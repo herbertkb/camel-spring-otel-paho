@@ -49,10 +49,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-rest-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-paho-mqtt5-starter</artifactId>
         </dependency>
         <dependency>
@@ -76,7 +72,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-version}</version>
                 <configuration>
-                    <mainClass>com.example.amqp.producer.Application</mainClass>
+                    <mainClass>com.example.paho.producer.Application</mainClass>
                 </configuration>
                 <executions>
                     <execution>

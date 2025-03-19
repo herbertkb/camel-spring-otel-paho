@@ -12,10 +12,10 @@
     <properties>
         <camel-version>4.8.3.redhat-00009</camel-version>
         <spring-boot-version>3.3.8</spring-boot-version>
-        <opentelemetry-agent.version>1.25.1</opentelemetry-agent.version>
+        <opentelemetry-agent.version>2.5.0.redhat-00003</opentelemetry-agent.version>
         <!-- <maven.compiler.release>17</maven.compiler.release> -->
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
